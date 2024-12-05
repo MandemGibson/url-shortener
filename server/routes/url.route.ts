@@ -1,8 +1,18 @@
 import { Router } from "express";
-import { createShortUrlHandler } from "../controllers/url.controller";
+import {
+  createShortUrlHandler,
+  deleteShortUrlHandler,
+  redirectToOriginalUrl,
+  updateShortUrlHandler,
+} from "../controllers/url.controller";
 
 const urlRouter = Router();
 
-urlRouter.post("/shorten", createShortUrlHandler);
+urlRouter.route("/").post(createShortUrlHandler);
+urlRouter
+  .route("/:shortCode")
+  .get(redirectToOriginalUrl)
+  .put(updateShortUrlHandler)
+  .delete(deleteShortUrlHandler);
 
 export { urlRouter };

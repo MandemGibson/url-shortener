@@ -1,12 +1,15 @@
 import express from "express";
 import mongoose from "mongoose";
+import { config } from "dotenv";
+
 import { urlRouter } from "./routes/url.route";
-const uri =
-  "mongodb+srv://themaingib:aQuApyCCxf2v980x@urlshortener.uhshk.mongodb.net/url-shortener?retryWrites=true&w=majority&appName=urlshortener";
+config();
+
+const uri = process.env.MONGO_URI as string;
 
 const app = express();
 app.use(express.json());
-app.use("/api/urls", urlRouter);
+app.use("/api/urls/shorten", urlRouter);
 
 async function connectDB() {
   try {
@@ -21,4 +24,4 @@ async function connectDB() {
   }
 }
 
-connectDB()
+connectDB();
