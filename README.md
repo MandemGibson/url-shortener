@@ -1,5 +1,3 @@
-Here's a streamlined README for your URL shortener project:
-
 ---
 
 # URL Shortener
