@@ -84,3 +84,8 @@ npm run dev
 ### Notes:
 - Ensure the `MONGO_URI` in the `.env` file is set to the correct MongoDB database URL.
 - For production, consider using environment variables to keep sensitive information like database URLs secure.
+
+### Project URL (Roadmap.sh Reference)
+```
+https://roadmap.sh/projects/url-shortening-service
+```
