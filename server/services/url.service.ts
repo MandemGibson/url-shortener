@@ -3,14 +3,45 @@ import { generateRandomShortCode } from "../utils/generateRandomShortCode";
 
 export const createShortUrl = async (url: string) => {
   try {
-    const shortCode = generateRandomShortCode();
-    return await Url.create({ url, shortCode });
+    const shortCode = await generateRandomShortCode();
+    const newUrl = await Url.create({ url, shortCode });
+
+    const { accessCount, ...result } = newUrl.toObject();
+    return result;
   } catch (error) {
     console.log("Error creating short url: ", error);
   }
 };
 
-export const getOriginalUrl = async (shortCode: string) => {
+export const getAllShortUrl = async () => {
+  try {
+    return await Url.find({}, { accessCount: 0 });
+  } catch (error) {
+    console.log("Error getting all short urls: ", error);
+  }
+};
+
+export const getAllShortUrlWithStats = async () => {
+  try {
+    return await Url.find();
+  } catch (error) {
+    console.log("Error getting all short urls: ", error);
+  }
+};
+
+export const getShortUrl = async (shortCode: string) => {
+  try {
+    return await Url.findOneAndUpdate(
+      { shortCode },
+      { $inc: { accessCount: 1 } },
+      { new: true, projection: { accessCount: 0 } }
+    );
+  } catch (error) {
+    console.log("Error getting original url: ", error);
+  }
+};
+
+export const getShortUrlWithStats = async (shortCode: string) => {
   try {
     return await Url.findOneAndUpdate(
       { shortCode },
@@ -24,7 +55,11 @@ export const getOriginalUrl = async (shortCode: string) => {
 
 export const updateShortUrl = async (url: string, shortCode: string) => {
   try {
-    return await Url.findOneAndUpdate({ shortCode }, { url }, { new: true });
+    return await Url.findOneAndUpdate(
+      { shortCode },
+      { url },
+      { new: true, projection: { accessCount: 0 } }
+    );
   } catch (error) {
     console.log("Error updating short url: ", error);
   }
@@ -32,7 +67,7 @@ export const updateShortUrl = async (url: string, shortCode: string) => {
 
 export const deleteShortUrl = async (shortCode: string) => {
   try {
-    await Url.deleteOne({ shortCode });
+    return await Url.deleteOne({ shortCode });
   } catch (error) {
     console.log("Error deleting short url: ", error);
   }

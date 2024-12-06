@@ -16,12 +16,14 @@ async function connectDB() {
     await mongoose.connect(uri);
     console.log("Connected to mongoDB");
 
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Error connecting to mongoDB: ", error);
-  }
+    process.exit(1);
+  } 
 }
 
 connectDB();

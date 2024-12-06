@@ -2,17 +2,22 @@ import { Router } from "express";
 import {
   createShortUrlHandler,
   deleteShortUrlHandler,
-  redirectToOriginalUrl,
+  getAllShortUrlsHandler,
+  getAllShortUrlsWithStatsHandler,
+  getShortUrlHandler,
+  getShortUrlWithStatsHandler,
   updateShortUrlHandler,
 } from "../controllers/url.controller";
 
 const urlRouter = Router();
 
-urlRouter.route("/").post(createShortUrlHandler);
+urlRouter.route("/").get(getAllShortUrlsHandler).post(createShortUrlHandler);
+urlRouter.get("/stats", getAllShortUrlsWithStatsHandler);
 urlRouter
   .route("/:shortCode")
-  .get(redirectToOriginalUrl)
+  .get(getShortUrlHandler)
   .put(updateShortUrlHandler)
   .delete(deleteShortUrlHandler);
+urlRouter.get("/:shortCode/stats", getShortUrlWithStatsHandler);
 
 export { urlRouter };

@@ -1,7 +1,10 @@
 import {
   createShortUrl,
   deleteShortUrl,
-  getOriginalUrl,
+  getAllShortUrl,
+  getAllShortUrlWithStats,
+  getShortUrl,
+  getShortUrlWithStats,
   updateShortUrl,
 } from "./../services/url.service";
 import { Request, Response, NextFunction } from "express";
@@ -16,16 +19,43 @@ export const createShortUrlHandler = async (
     if (!url) return res.status(400).json({ message: "Please provide url" });
     const newUrl = await createShortUrl(url);
 
-    res.status(201).json({
-      message: "URL shortened successfully",
-      shortenUrl: `${req.headers.host}/${newUrl?.shortCode}`,
-    });
+    res.status(201).json(newUrl);
   } catch (error) {
     res.status(500).json({ message: "Error shortening url: ", error });
   }
 };
 
-export const redirectToOriginalUrl = async (
+export const getAllShortUrlsHandler = async (
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): Promise<any> => {
+  try {
+    const shortUrls = await getAllShortUrl();
+    if (!shortUrls?.length)
+      return res.status(404).json({ message: "No short urls found" });
+    res.status(200).json(shortUrls);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching all short urls: ", error });
+  }
+};
+
+export const getAllShortUrlsWithStatsHandler = async (
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): Promise<any> => {
+  try {
+    const shortUrls = await getAllShortUrlWithStats();
+    if (!shortUrls?.length)
+      return res.status(404).json({ message: "No short urls found" });
+    res.status(200).json(shortUrls);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching all short urls: ", error });
+  }
+};
+
+export const getShortUrlHandler = async (
   req: Request,
   res: Response,
   _next: NextFunction
@@ -35,15 +65,37 @@ export const redirectToOriginalUrl = async (
     if (!shortCode)
       return res.status(404).json({ message: "No short code found" });
 
-    const url = await getOriginalUrl(shortCode);
+    const url = await getShortUrl(shortCode);
     if (!url)
       return res
         .status(404)
         .json({ message: "No url found for this short code" });
 
-    res.redirect(url.url);
+    res.status(200).json(url);
   } catch (error) {
-    res.status(500).json({ message: "Error redirecting url: ", error });
+    res.status(500).json({ message: "Error getting url: ", error });
+  }
+};
+
+export const getShortUrlWithStatsHandler = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): Promise<any> => {
+  try {
+    const { shortCode } = req.params;
+    if (!shortCode)
+      return res.status(404).json({ message: "No short code found" });
+
+    const url = await getShortUrlWithStats(shortCode);
+    if (!url)
+      return res
+        .status(404)
+        .json({ message: "No url found for this short code" });
+
+    res.status(200).json(url);
+  } catch (error) {
+    res.status(500).json({ message: "Error getting url: ", error });
   }
 };
 
@@ -61,10 +113,7 @@ export const updateShortUrlHandler = async (
         .json({ message: "Both short code and url must required" });
 
     const updatedUrl = await updateShortUrl(url, shortCode);
-    res.status(200).json({
-      message: "Updated shortened url successfully",
-      shortenUrl: `${req.headers.host}/${updatedUrl?.shortCode}`,
-    });
+    res.status(200).json(updatedUrl);
   } catch (error) {
     res.status(500).json({ message: "Error updating url: ", error });
   }
@@ -80,7 +129,12 @@ export const deleteShortUrlHandler = async (
     if (!shortCode)
       return res.status(404).json({ message: "No short code found" });
 
-    await deleteShortUrl(shortCode);
+    const deletedShortUrl = await deleteShortUrl(shortCode);
+
+    if (deletedShortUrl?.deletedCount === 0)
+      return res.status(400).json({
+        message: "Invalid short code. Try again",
+      });
     res.status(200).json({ message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting url: ", error });
