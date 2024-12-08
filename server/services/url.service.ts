@@ -29,6 +29,14 @@ export const getAllShortUrlWithStats = async () => {
   }
 };
 
+export const getShortUrlByOriginalUrl = async (url: string) => {
+  try {
+    return await Url.findOne({ url });
+  } catch (error) {
+    console.log("Error getting short url by original url: ", error);
+  }
+};
+
 export const getShortUrl = async (shortCode: string) => {
   try {
     return await Url.findOneAndUpdate(

@@ -5,6 +5,7 @@ import {
   getAllShortUrl,
   getAllShortUrlWithStats,
   getShortUrl,
+  getShortUrlByOriginalUrl,
   getShortUrlWithStats,
   updateShortUrl,
 } from "./../services/url.service";
@@ -19,6 +20,11 @@ export const createShortUrlHandler = async (
     const { url } = req.body;
     if (!url || url === "")
       return res.status(400).json({ message: "Please provide url" });
+
+    const existingUrl = await getShortUrlByOriginalUrl(url)
+    if (existingUrl) {
+      return res.status(200).json(existingUrl);
+      }
 
     const newUrl = await createShortUrl(url);
 
