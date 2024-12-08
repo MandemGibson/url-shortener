@@ -1,7 +1,51 @@
+import { useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FaArrowRightLong, FaXTwitter } from "react-icons/fa6";
+import { VscLoading } from "react-icons/vsc";
+import { Modal } from "./Modal";
 
-function App() {
+const App = () => {
+  const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState<string>("");
+  const [openModal, setOpenModal] = useState(true);
+  const [data, setData] = useState<
+    | {
+        _id: string;
+        url: string;
+        shortCode: string;
+      }
+    | undefined
+  >();
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    try {
+      event.preventDefault();
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/api/urls/shorten", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        setData(data);
+        setOpenModal(true);
+      }
+    } catch (error) {
+      console.log("Error generating link: ", error);
+    } finally {
+      setLoading(false);
+      setUrl("");
+    }
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+  };
+
   return (
     <main className="h-screen relative flex flex-col items-center justify-center sm:justify-normal overflow-hidden">
       <div className="absolute md:left-0 top-0">
@@ -23,8 +67,11 @@ function App() {
         Transform long URLs into tiny links in seconds.
       </p>
 
-      <form className="px-5 flex flex-col w-full max-w-md mt-6">
-        <h1 className="text-white/80 text-center">Create Link Below</h1>
+      <form
+        onSubmit={handleSubmit}
+        className="px-5 flex flex-col w-full max-w-md mt-10"
+      >
+        <h1 className="text-white text-center mb-5">Generate Link Below</h1>
         <div className="mt-2 relative">
           <label
             htmlFor="destination"
@@ -37,6 +84,8 @@ function App() {
               id="destination"
               name="destination"
               type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="eg. https://www.example.com/some/long-url"
               className="block w-full py-2 pl-3 pr-10 bg-transparent text-base
                text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
@@ -47,13 +96,23 @@ function App() {
           className="flex items-center text-sm py-2 mt-3 font-medium rounded-md bg-[#4ca5ff] 
           hover:bg-gradient-to-b hover:from-[#4ca5ff] hover:to-[#b573f8] justify-center
           gap-x-5 hover:text-white transition ease-linear delay-75 group"
+          disabled={loading}
         >
-          Generate Short Link
-          <FaArrowRightLong
-            size={18}
-            className="opacity-0 -translate-x-5 group-hover:opacity-100
-            group-hover:translate-x-0 transition-all duration-300 ease-out"
-          />
+          {loading ? (
+            <>
+              Generating
+              <VscLoading className="animate animate-spin" />
+            </>
+          ) : (
+            <>
+              Generate Short Link
+              <FaArrowRightLong
+                size={18}
+                className="opacity-0 -translate-x-5 group-hover:opacity-100
+          group-hover:translate-x-0 transition-all duration-300 ease-out"
+              />
+            </>
+          )}
         </button>
       </form>
       <footer className="flex flex-col h-full w-full justify-end text-white py-4">
@@ -89,8 +148,10 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {openModal && <Modal data={data} onClose={handleModalClose} />}
     </main>
   );
-}
+};
 
 export default App;
