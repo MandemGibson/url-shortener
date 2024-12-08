@@ -16,6 +16,10 @@ const createShortUrlHandler = (req, res, _next) => __awaiter(void 0, void 0, voi
         const { url } = req.body;
         if (!url || url === "")
             return res.status(400).json({ message: "Please provide url" });
+        const existingUrl = yield (0, url_service_1.getShortUrlByOriginalUrl)(url);
+        if (existingUrl) {
+            return res.status(200).json(existingUrl);
+        }
         const newUrl = yield (0, url_service_1.createShortUrl)(url);
         res.status(201).json(newUrl);
     }

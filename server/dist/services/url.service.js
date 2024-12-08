@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteShortUrl = exports.updateShortUrl = exports.getShortUrlWithStats = exports.getShortUrl = exports.getAllShortUrlWithStats = exports.getAllShortUrl = exports.createShortUrl = void 0;
+exports.deleteShortUrl = exports.updateShortUrl = exports.getShortUrlWithStats = exports.getShortUrl = exports.getShortUrlByOriginalUrl = exports.getAllShortUrlWithStats = exports.getAllShortUrl = exports.createShortUrl = void 0;
 const Url_1 = require("../models/Url");
 const generateRandomShortCode_1 = require("../utils/generateRandomShortCode");
 const createShortUrl = (url) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53,6 +53,15 @@ const getAllShortUrlWithStats = () => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getAllShortUrlWithStats = getAllShortUrlWithStats;
+const getShortUrlByOriginalUrl = (url) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return yield Url_1.Url.findOne({ url });
+    }
+    catch (error) {
+        console.log("Error getting short url by original url: ", error);
+    }
+});
+exports.getShortUrlByOriginalUrl = getShortUrlByOriginalUrl;
 const getShortUrl = (shortCode) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         return yield Url_1.Url.findOneAndUpdate({ shortCode }, { $inc: { accessCount: 1 } }, { new: true, projection: { accessCount: 0 } });
