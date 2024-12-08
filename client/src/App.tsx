@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { FaArrowRightLong, FaXTwitter } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
 import { Modal } from "./Modal";
+
+const apiUrl = import.meta.env.VITE_API_URL;
+const environment = import.meta.env.VITE_ENV;
 
 const App = () => {
   const [loading, setLoading] = useState(false);
@@ -16,12 +19,29 @@ const App = () => {
       }
     | undefined
   >();
+  const [error, setError] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (url !== "") setError(false);
+  }, [url]);
+
+  const reqUrl =
+    environment === "development"
+      ? "/api/urls/shorten"
+      : `${apiUrl}/api/urls/shorten`;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log(environment);
+
     try {
       event.preventDefault();
+
+      if (url === "") {
+        setError(true);
+        return;
+      }
       setLoading(true);
-      const response = await fetch("/api/urls/shorten", {
+      const response = await fetch(reqUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,7 +49,7 @@ const App = () => {
         body: JSON.stringify({ url }),
       });
       console.log(response);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log(data);
@@ -77,11 +97,17 @@ const App = () => {
         <div className="mt-2 relative">
           <label
             htmlFor="destination"
-            className="block text-sm font-medium text-white"
+            className={`block text-sm font-medium ${
+              error ? "text-red-500" : "text-white"
+            }`}
           >
             Destination URL
           </label>
-          <div className="flex items-center rounded-md bg-white mt-1">
+          <div
+            className={`flex items-center rounded-md bg-white mt-1 ${
+              error ? "border border-red-500" : "border-none"
+            }`}
+          >
             <input
               id="destination"
               name="destination"
@@ -93,6 +119,11 @@ const App = () => {
                text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
             />
           </div>
+          {error && (
+            <p className="text-red-500 text-xs mt-1">
+              Please enter a valid URL
+            </p>
+          )}
         </div>
         <button
           className="flex items-center text-sm py-2 mt-3 font-medium rounded-md bg-[#4ca5ff] 
