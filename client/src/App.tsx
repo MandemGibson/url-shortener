@@ -7,7 +7,7 @@ import { Modal } from "./Modal";
 const App = () => {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState<string>("");
-  const [openModal, setOpenModal] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
   const [data, setData] = useState<
     | {
         _id: string;
@@ -21,13 +21,15 @@ const App = () => {
     try {
       event.preventDefault();
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/urls/shorten", {
+      const response = await fetch("/api/urls/shorten", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ url }),
       });
+      console.log(response);
+      
       if (response.ok) {
         const data = await response.json();
         console.log(data);

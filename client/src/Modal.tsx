@@ -22,7 +22,7 @@ export const Modal: FC<ModalProps> = ({ onClose, data }) => {
 
   const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(`localhost:3000/${data?.shortCode}`);
+      await navigator.clipboard.writeText(`url-shortener-xmeg.onrender.com/${data?.shortCode}`);
       setCopied({
         copied: true,
         message: "Copied!",
@@ -57,7 +57,7 @@ export const Modal: FC<ModalProps> = ({ onClose, data }) => {
           className="flex flex-col items-center w-full py-5 px-2 space-y-5 bg-[#4ca5ff]/10
          rounded"
         >
-          <p className="text-[#4ca5ff]">localhost:3000/{data?.shortCode}</p>
+          <p className="text-[#4ca5ff]">url-shortener-xmeg.onrender.com/{data?.shortCode}</p>
           {copied.copied ? (
             <div
               className="flex items-center p-2 rounded bg-blue-700 space-x-2 ring-2
