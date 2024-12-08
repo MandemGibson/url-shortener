@@ -1,3 +1,4 @@
+import { Url } from "../models/Url";
 import {
   createShortUrl,
   deleteShortUrl,
@@ -16,7 +17,9 @@ export const createShortUrlHandler = async (
 ): Promise<any> => {
   try {
     const { url } = req.body;
-    if (!url) return res.status(400).json({ message: "Please provide url" });
+    if (!url || url === "")
+      return res.status(400).json({ message: "Please provide url" });
+
     const newUrl = await createShortUrl(url);
 
     res.status(201).json(newUrl);
@@ -138,5 +141,25 @@ export const deleteShortUrlHandler = async (
     res.status(200).json({ message: "Deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting url: ", error });
+  }
+};
+
+export const redirectToOriginalHandler = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): Promise<any> => {
+  const { shortCode } = req.params;
+
+  try {
+    const urlEntry = await getShortUrl(shortCode);
+    if (!urlEntry) {
+      return res.status(404).send("Short URL not found.");
+    }
+
+    res.redirect(urlEntry.url);
+  } catch (error) {
+    console.error("Error during redirection:", error);
+    res.status(500).send("Server error.");
   }
 };
