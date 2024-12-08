@@ -20,15 +20,31 @@ const App = () => {
     | undefined
   >();
   const [error, setError] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (url !== "") setError(false);
+    if (url !== "") {
+      setError(false);
+      setErrorMsg("");
+    }
   }, [url]);
 
   const reqUrl =
     environment === "development"
       ? "/api/urls/shorten"
       : `${apiUrl}/api/urls/shorten`;
+
+  const validateUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      console.log(e);
+      setError(true);
+      setErrorMsg("Provide a valid URL");
+      return false;
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     console.log(environment);
@@ -38,9 +54,17 @@ const App = () => {
 
       if (url === "") {
         setError(true);
+        setErrorMsg("Provide a URL");
         return;
       }
+
       setLoading(true);
+
+      if (!validateUrl(url)) {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(reqUrl, {
         method: "POST",
         headers: {
@@ -71,14 +95,12 @@ const App = () => {
   return (
     <main className="h-screen relative flex flex-col items-center justify-center sm:justify-normal overflow-hidden">
       <div className="absolute md:left-0 top-0">
+        <div className="absolute  w-[500px] h-[500px] bg-white rounded-full sm:rounded-none rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute  w-[300px] h-[300px] bg-white rounded-full sm:rounded-none rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute  w-[250px] h-[250px] bg-white rounded-full sm:rounded-none rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute  w-[200px] h-[200px] bg-white rounded-full sm:rounded-none rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
       </div>
       <div className="absolute right-0 hidden sm:block">
+        <div className="absolute  w-[500px] h-[500px] bg-white rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute  w-[300px] h-[300px] bg-white rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute  w-[250px] h-[250px] bg-white rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute  w-[200px] h-[200px] bg-white rotate-45 opacity-5 transform -translate-x-1/2 -translate-y-1/2" />
       </div>
       <div className="bg-gradient-to-r from-[#4ca5ff] to-[#b573f8] bg-clip-text mt-10">
         <h1 className="text-[40px] text-transparent font-bold font-poppins">
@@ -119,11 +141,7 @@ const App = () => {
                text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
             />
           </div>
-          {error && (
-            <p className="text-red-500 text-xs mt-1">
-              Please enter a valid URL
-            </p>
-          )}
+          {error && <p className="text-red-500 text-xs mt-1">{errorMsg}</p>}
         </div>
         <button
           className="flex items-center text-sm py-2 mt-3 font-medium rounded-md bg-[#4ca5ff] 
